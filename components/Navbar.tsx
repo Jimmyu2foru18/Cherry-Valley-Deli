@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { Page } from '../types';
+import { useCart } from '../context/CartContext';
 
 interface NavbarProps {
   currentPage: Page;
@@ -9,6 +10,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { cartCount, setIsCartOpen } = useCart();
 
   const navLinks: { name: string; value: Page }[] = [
     { name: 'Home', value: 'HOME' },
@@ -23,8 +25,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
     onNavigate(page);
   };
 
+  const handleCartClick = () => {
+    setIsOpen(false);
+    setIsCartOpen(true);
+  };
+
   return (
-    <nav className="fixed w-full z-50 bg-dark-900/95 backdrop-blur-lg shadow-lg border-b border-white/5 py-3 transition-all duration-300">
+    <nav className="fixed w-full z-40 bg-dark-900/95 backdrop-blur-lg shadow-lg border-b border-white/5 py-3 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
@@ -52,16 +59,32 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
             ))}
             
             <button 
-              onClick={() => handleNavClick('ORDER')}
-              className="bg-cherry-600 hover:bg-cherry-700 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-cherry-600/30 transition-all hover:scale-105 flex items-center gap-2"
+              onClick={handleCartClick}
+              className="relative bg-cherry-600 hover:bg-cherry-700 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-cherry-600/30 transition-all hover:scale-105 flex items-center gap-2"
             >
               <ShoppingBag size={18} />
-              Order Now
+              My Order
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-white text-cherry-600 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md">
+                  {cartCount}
+                </span>
+              )}
             </button>
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center gap-4">
+             <button 
+              onClick={handleCartClick}
+              className="relative text-white p-2"
+            >
+              <ShoppingBag size={24} />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-cherry-600 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-300 hover:text-white focus:outline-none"
@@ -88,11 +111,11 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
               </button>
             ))}
              <button 
-              onClick={() => handleNavClick('ORDER')}
+              onClick={handleCartClick}
               className="w-full max-w-xs mt-8 bg-cherry-600 text-white px-4 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg shadow-xl shadow-cherry-600/20"
             >
               <ShoppingBag size={24} />
-              Order Online
+              View Order ({cartCount})
             </button>
           </div>
         </div>

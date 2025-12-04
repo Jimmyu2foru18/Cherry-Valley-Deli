@@ -1,12 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Flame, Star, X, ShoppingBag } from 'lucide-react';
+import ReactDOM from 'react-dom';
+import { Search, Flame, Star, X, ShoppingBag, Plus } from 'lucide-react';
 import { Category, MenuItem } from '../types';
 import { CATEGORIES, MENU_ITEMS } from '../constants';
+import { useCart } from '../context/CartContext';
 
 const Menu: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<Category>(Category.ALL);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const { addToCart } = useCart();
 
   const filteredItems = useMemo(() => {
     return MENU_ITEMS.filter((item) => {
@@ -17,12 +20,10 @@ const Menu: React.FC = () => {
     });
   }, [activeCategory, searchQuery]);
 
-  const handleOrder = (platform: 'grubhub' | 'seamless') => {
-    // In a real app, these would be deep links to the specific item
-    const url = platform === 'grubhub' 
-      ? 'https://www.grubhub.com/restaurant/cherry-valley-deli-inc-168-hempstead-tpke-west-hempstead/259478' 
-      : 'https://www.seamless.com';
-    window.open(url, '_blank');
+  // Handle Add to Order with Stop Propagation
+  const handleAddToCart = (e: React.MouseEvent, item: MenuItem) => {
+    e.stopPropagation();
+    addToCart(item);
   };
 
   return (
@@ -120,10 +121,13 @@ const Menu: React.FC = () => {
                   </p>
                 </div>
                 <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm font-bold text-cherry-600">
-                  <span>View Details</span>
-                  <div className="w-8 h-8 rounded-full bg-cherry-50 flex items-center justify-center group-hover:bg-cherry-600 group-hover:text-white transition-colors">
-                    <ShoppingBag size={16} />
-                  </div>
+                  <span className="text-slate-400 font-normal">Details &rarr;</span>
+                  <button 
+                    onClick={(e) => handleAddToCart(e, item)}
+                    className="px-4 py-2 bg-gray-100 hover:bg-cherry-600 hover:text-white rounded-full transition-colors flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add
+                  </button>
                 </div>
               </div>
             </div>
@@ -131,62 +135,78 @@ const Menu: React.FC = () => {
         </div>
       </div>
 
-      {/* Item Modal */}
+      {/* Item Modal - Rendered via Portal to fix z-index issues */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in-up">
-          <div className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row relative">
-            <button 
-              onClick={() => setSelectedItem(null)}
-              className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors"
-            >
-              <X size={20} />
-            </button>
+        <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} onAdd={() => addToCart(selectedItem)} />
+      )}
+    </div>
+  );
+};
 
-            <div className="w-full md:w-1/2 h-64 md:h-auto relative">
-              <img src={selectedItem.imageUrl} alt={selectedItem.name} className="w-full h-full object-cover" />
+// Separate Component for Modal to handle Portal logic cleanly
+const ItemModal: React.FC<{ item: MenuItem; onClose: () => void; onAdd: () => void }> = ({ item, onClose, onAdd }) => {
+  // Use portal to render modal at document root level
+  const portalRoot = document.getElementById('portal-root') || document.body;
+
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in-up">
+      {/* Overlay click to close */}
+      <div className="absolute inset-0" onClick={onClose}></div>
+
+      <div className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row relative z-10">
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full transition-colors"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="w-full md:w-1/2 h-64 md:h-auto relative">
+          <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+        </div>
+
+        <div className="w-full md:w-1/2 p-8 flex flex-col justify-between">
+          <div>
+            <div className="mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-cherry-600">{item.category}</span>
             </div>
-
-            <div className="w-full md:w-1/2 p-8 flex flex-col justify-between">
-              <div>
-                <div className="mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-cherry-600">{selectedItem.category}</span>
-                </div>
-                <h2 className="text-3xl font-display font-bold text-slate-900 mb-2">{selectedItem.name}</h2>
-                <h3 className="text-2xl font-bold text-slate-700 mb-4">{selectedItem.price}</h3>
-                <p className="text-slate-600 leading-relaxed mb-6">
-                  {selectedItem.description}
-                </p>
-                
-                {selectedItem.tags && (
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {selectedItem.tags.map(tag => (
-                      <span key={tag} className="px-3 py-1 bg-gray-100 text-slate-600 rounded-full text-xs font-bold border border-gray-200">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+            <h2 className="text-3xl font-display font-bold text-slate-900 mb-2">{item.name}</h2>
+            <h3 className="text-2xl font-bold text-slate-700 mb-4">{item.price}</h3>
+            <p className="text-slate-600 leading-relaxed mb-6">
+              {item.description}
+            </p>
+            
+            {item.tags && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {item.tags.map(tag => (
+                  <span key={tag} className="px-3 py-1 bg-gray-100 text-slate-600 rounded-full text-xs font-bold border border-gray-200">
+                    {tag}
+                  </span>
+                ))}
               </div>
+            )}
+          </div>
 
-              <div className="space-y-3">
-                <button 
-                  onClick={() => handleOrder('grubhub')}
-                  className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
-                >
-                  Order on Grubhub
-                </button>
-                 <button 
-                  onClick={() => handleOrder('seamless')}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
-                >
-                  Order on Seamless
-                </button>
-              </div>
+          <div className="space-y-3">
+            <button 
+              onClick={() => { onAdd(); onClose(); }}
+              className="w-full py-4 bg-cherry-600 hover:bg-cherry-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-cherry-600/20"
+            >
+              <ShoppingBag size={20} /> Add to Order
+            </button>
+            <div className="flex gap-2">
+              <button className="flex-1 py-2 text-xs font-bold text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50">
+                Grubhub
+              </button>
+              <button className="flex-1 py-2 text-xs font-bold text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50">
+                Seamless
+              </button>
             </div>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </div>,
+    portalRoot
   );
 };
 

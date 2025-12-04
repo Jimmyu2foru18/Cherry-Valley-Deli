@@ -11,6 +11,11 @@ export interface MenuItem {
   featured?: boolean;
 }
 
+export interface CartItem extends MenuItem {
+  cartId: string;
+  quantity: number;
+}
+
 export enum Category {
   ALL = 'All',
   BREAKFAST = 'Breakfast',

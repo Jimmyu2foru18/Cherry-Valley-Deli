@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import CartSidebar from './components/CartSidebar';
+import { CartProvider } from './context/CartContext';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
 import About from './pages/About';
@@ -67,13 +69,16 @@ function App() {
   const isDashboard = currentPage === 'DASHBOARD';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {!isDashboard && <Navbar currentPage={currentPage} onNavigate={handleNavigate} />}
-      <main className="flex-grow">
-        {renderPage()}
-      </main>
-      {!isDashboard && <Footer onNavigate={handleNavigate} />}
-    </div>
+    <CartProvider>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {!isDashboard && <Navbar currentPage={currentPage} onNavigate={handleNavigate} />}
+        <CartSidebar />
+        <main className="flex-grow">
+          {renderPage()}
+        </main>
+        {!isDashboard && <Footer onNavigate={handleNavigate} />}
+      </div>
+    </CartProvider>
   );
 }
 
