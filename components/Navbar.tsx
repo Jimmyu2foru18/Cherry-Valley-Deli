@@ -31,15 +31,25 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   };
 
   return (
-    <nav className="fixed w-full z-40 bg-dark-900/95 backdrop-blur-lg shadow-lg border-b border-white/5 py-3 transition-all duration-300">
+    <nav className="fixed w-full z-40 bg-dark-900/95 backdrop-blur-lg shadow-lg border-b border-white/5 py-2 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           
-          {/* Logo */}
-          <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => handleNavClick('HOME')}>
-            <span className="font-display font-bold text-2xl tracking-wider uppercase text-white transition-colors hover:text-cherry-500">
-              Cherry<span className="text-cherry-600">Valley</span>Deli
-            </span>
+          {/* Logo Section */}
+          <div className="flex-shrink-0 flex items-center cursor-pointer gap-3 group" onClick={() => handleNavClick('HOME')}>
+            <img 
+              src="https://res.cloudinary.com/grubhub/image/upload/w_90,h_90,f_auto,fl_lossy,q_100,c_fit/bjv0x7hl5bxyphq2xemk" 
+              alt="Cherry Valley Deli Logo" 
+              className="h-14 w-14 rounded-full border-2 border-cherry-600/50 shadow-lg group-hover:scale-105 transition-transform duration-300 bg-white p-0.5"
+            />
+            <div className="flex flex-col">
+              <span className="font-display font-bold text-xl md:text-2xl tracking-wider uppercase text-white transition-colors group-hover:text-cherry-500 leading-none">
+                Cherry<span className="text-cherry-600">Valley</span>
+              </span>
+              <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-[0.2em] group-hover:text-gray-300 transition-colors mt-1">
+                Deli & Grill
+              </span>
+            </div>
           </div>
 
           {/* Desktop Menu */}
@@ -63,7 +73,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
               className="relative bg-cherry-600 hover:bg-cherry-700 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-cherry-600/30 transition-all hover:scale-105 flex items-center gap-2"
             >
               <ShoppingBag size={18} />
-              My Order
+              My Order List
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-white text-cherry-600 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md">
                   {cartCount}
@@ -97,7 +107,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
 
       {/* Mobile Menu Dropdown */}
       {isOpen && (
-        <div className="md:hidden bg-dark-900 border-t border-white/10 absolute w-full backdrop-blur-xl h-screen">
+        <div className="md:hidden bg-dark-900 border-t border-white/10 absolute w-full backdrop-blur-xl h-screen z-50">
           <div className="px-4 pt-8 pb-6 space-y-4 flex flex-col items-center">
             {navLinks.map((link) => (
               <button
@@ -115,7 +125,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
               className="w-full max-w-xs mt-8 bg-cherry-600 text-white px-4 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg shadow-xl shadow-cherry-600/20"
             >
               <ShoppingBag size={24} />
-              View Order ({cartCount})
+              View Order List ({cartCount})
             </button>
           </div>
         </div>
