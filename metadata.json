@@ -1,0 +1,7 @@
+{
+  "name": "Cherry Valley Deli Inc.",
+  "description": "Modern redesign for West Hempstead's iconic sandwich destination featuring online ordering, menu browsing, and location services.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
